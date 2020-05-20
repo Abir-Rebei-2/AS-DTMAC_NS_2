@@ -1547,6 +1547,23 @@ double AS-DTMAC::Euclidistance(int i, int j){
 	  	return EuDist;
 
 }
+\\This is a new function that generate a key based on the difference between distances.
+void ASDTMAC::generate_dist(int *binaryNum,int i,int j)
+{
+int dist=Euclidistance(i,j);
+int k=8 ;
+ 
+ while(dist>0) {
+			binaryNum[k]=dist%2;
+                        dist = dist/2 ;
+                        k-- ;
+		}
+while (k>=0) {
+
+			binaryNum[k]=0;
+                        k-- ;
+		}
+}
 
 /*void AS-DTMAC::update_direction(Event *e) {
 	if (!dir_timer_.initialized_)
