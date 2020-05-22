@@ -447,7 +447,36 @@ void AS-DTMAC::recv(Packet* p, Handler* h) {
 	
 
 	}
+vehicule=vh->src_mac_addr_ ;
+\\determine the slot of the sender	
+for (int i=0; i<frame_len_ ; i++)
+{
+if (neigh_mac_addr_[i] == vehicule)
+{
+s_init = i;
 
+}
+break;
+}
+//insert the test here and affect the value of relay slot
+if (s_init < 34)
+   {
+	relay_slot=34;
+//fprintf(Routage_,"La competition deroulera dans le slot 34 \n");
+   }
+   else if ( (34 < s_init) and (s_init < 67) )
+   {
+	relay_slot=67;
+//fprintf(Routage_,"La competition deroulera dans le slot 67 \n");
+   }
+   
+
+   else
+   {
+	relay_slot=0;
+//fprintf(Routage_,"La competition deroulera dans le slot 0 \n");
+   }
+	
 }
 
 double AS-DTMAC::AccessColissionProbability()
