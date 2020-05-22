@@ -447,7 +447,35 @@ void AS-DTMAC::recv(Packet* p, Handler* h) {
 	
 
 	}
+vehicule=vh->src_mac_addr_ ;
+//determine the slot of the sender
+for (int i=0; i<frame_len_ ; i++)
+{
+if (neigh_mac_addr_[i] == vehicule)
+{
+s_init = i;
 
+}
+break;
+}
+//insert the test here and affect the value of relay slot
+if (s_init < 34)
+   {
+	relay_slot=34;
+//fprintf(Routage_,"La competition deroulera dans le slot 34 \n");
+   }
+   else if ( (34 < s_init) and (s_init < 67) )
+   {
+	relay_slot=67;
+//fprintf(Routage_,"La competition deroulera dans le slot 67 \n");
+   }
+   
+
+   else
+   {
+	relay_slot=0;
+//fprintf(Routage_,"La competition deroulera dans le slot 0 \n");
+   }
 }
 
 double AS-DTMAC::AccessColissionProbability()
@@ -663,7 +691,7 @@ bool AS-DTMAC::send(int s) {
 			downtarget_->recv(p, this);
 			return true;
 	}
-			
+		
 }
 
 int AS-DTMAC::burst_convert(long long n)
@@ -799,7 +827,46 @@ bool AS-DTMAC::check_node(int node){
 	}
 	return false;
 }*/
+// forward a message 
 
+
+bool ASDTMAC::forward(int relay_slot)
+{
+
+//This is the competition.
+
+ if(mini_slot_ <= 11)
+	  {
+	   fprintf(Routage_," At %g: frame %d : je suis vehicle %d en compétition pour faire le forwarding dans le slot: %d minislot %d \n", NOW,  frame_number, index_, relay_slot, mini_slot_);
+	         if(burst_generation_dist == 1)
+			{
+				burst_value_dist = 0;
+                                generate_dist(burst_v_seq2,neigh_mac_addr_[s_init],index_);
+				burst_generation_dist = 0;
+			}
+				
+		if (burst_v_seq2[mini_slot_] == 1)
+		       {
+						
+	        //fprintf(Routage_, "At %g: frame %d minislot %d: je suis vehicle %d j'ai envoyé mon signal burst de valeur %d \n", NOW, frame_number, mini_slot_, index_,burst_value);
+				send_burst_signal(mini_slot_);
+		
+		       }				
+	         }
+
+	  	
+    else
+       {
+    
+     bool sent2 = send(relay_slot);
+     fprintf(Routage_," Source %d At %g: frame %d: slot %d minislot %d:  TX_ slot: je suis vehicle %d j ai gagne la competition et le SLOT est à moi pour faire le forwarding: xi: %d \n", vehicule, NOW, frame_number, relay_slot, mini_slot_, index_,xi);
+                                
+     burst_generation_dist = 1;
+                          
+      }
+				
+return true;
+ }
 void AS-DTMAC::slot_handler(Event *e) {
 
 	
@@ -1139,7 +1206,13 @@ void AS-DTMAC::slot_handler(Event *e) {
 		
 		//Empty_black_node_list();		
 	}
-	
+//the forwarding should be in the relay slot 
+if ((relay_slot == slot_)and(relay_slot != -1))
+ {
+    bool aux= forward(relay_slot);
+
+
+ }	
 }
 
 void AS-DTMAC::direction_update_handler(Event *e)
